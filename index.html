@@ -1,0 +1,1828 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <title>Aryan Upadhayay Data Parser</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      color-scheme: light;
+      --font: "Plus Jakarta Sans", "Noto Sans Devanagari", sans-serif;
+      --bg: #f4f5fc;
+      --glow-a: #dddfff;
+      --glow-b: #e8eaff;
+      --card: rgba(255, 255, 255, .82);
+      --surface: #ffffff;
+      --soft: #f6f7fc;
+      --text: #20243d;
+      --muted: #68708b;
+      --border: #e0e3ef;
+      --accent: #5753df;
+      --accent-hover: #4540c8;
+      --accent-soft: #eeedff;
+      --ring: rgba(87, 83, 223, .20);
+      --amber: #926000;
+      --amber-bg: #fff4d7;
+      --amber-ring: rgba(220, 155, 29, .28);
+      --green: #187448;
+      --green-bg: #e5f6ec;
+      --red: #a83242;
+      --red-bg: #fff0f2;
+      --shadow: 0 24px 80px rgba(43, 42, 92, .09);
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        color-scheme: dark;
+        --bg: #111321;
+        --glow-a: #292448;
+        --glow-b: #1b2945;
+        --card: rgba(27, 30, 48, .88);
+        --surface: #23273b;
+        --soft: #1d2134;
+        --text: #f0f0fa;
+        --muted: #adb3ce;
+        --border: #383e59;
+        --accent: #a49bff;
+        --accent-hover: #b7afff;
+        --accent-soft: #302c50;
+        --ring: rgba(164, 155, 255, .24);
+        --amber: #f2c56d;
+        --amber-bg: #3a3020;
+        --amber-ring: rgba(242, 197, 109, .28);
+        --green: #8cddb0;
+        --green-bg: #203b32;
+        --red: #ffadb8;
+        --red-bg: #432731;
+        --shadow: 0 24px 80px rgba(0, 0, 0, .25);
+      }
+    }
+
+    * { box-sizing: border-box; }
+
+    [hidden] { display: none !important; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      min-height: 100svh;
+      padding: clamp(20px, 5vw, 64px) 16px;
+      background:
+        radial-gradient(ellipse at 5% 5%, var(--glow-a), transparent 48%),
+        radial-gradient(ellipse at 95% 90%, var(--glow-b), transparent 48%),
+        var(--bg);
+      color: var(--text);
+      font-family: var(--font);
+      line-height: 1.65;
+    }
+
+    button, input, select, textarea {
+      font: inherit;
+    }
+
+    button, a, input, select, textarea, summary {
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    button, input, select, textarea {
+      transition:
+        border-color .2s ease,
+        box-shadow .2s ease,
+        background-color .2s ease,
+        transform .2s ease,
+        opacity .2s ease;
+    }
+
+    button { cursor: pointer; }
+
+    button:disabled {
+      cursor: not-allowed;
+      opacity: .48;
+    }
+
+    :focus-visible {
+      outline: 3px solid var(--accent);
+      outline-offset: 4px;
+    }
+
+    .card {
+      width: min(100%, 760px);
+      margin: 0 auto;
+      padding: clamp(24px, 5vw, 44px);
+      border: 1px solid var(--border);
+      border-radius: 28px;
+      background: var(--card);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(22px);
+      -webkit-backdrop-filter: blur(22px);
+    }
+
+    .header {
+      position: relative;
+      padding-right: 64px;
+      margin-bottom: 32px;
+    }
+
+    .eyebrow {
+      margin: 0 0 10px;
+      color: var(--accent);
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: .16em;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      margin: 0;
+      max-width: 520px;
+      font-size: clamp(25px, 5vw, 36px);
+      font-weight: 800;
+      line-height: 1.25;
+      letter-spacing: -.045em;
+      text-wrap: balance;
+    }
+
+    .subtitle {
+      margin: 14px 0 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .icon-button {
+      position: absolute;
+      top: 0;
+      right: 0;
+      display: grid;
+      place-items: center;
+      width: 46px;
+      height: 46px;
+      padding: 0;
+      color: var(--accent);
+      background: var(--accent-soft);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+    }
+
+    .saved-dot {
+      position: absolute;
+      top: 5px;
+      right: 5px;
+      width: 9px;
+      height: 9px;
+      border: 2px solid var(--surface);
+      border-radius: 50%;
+      background: #26a66b;
+    }
+
+    svg {
+      width: 19px;
+      height: 19px;
+      flex-shrink: 0;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 1.8;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .field { margin-bottom: 22px; }
+
+    label {
+      display: block;
+      margin-bottom: 9px;
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    select, textarea, input {
+      display: block;
+      width: 100%;
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      background: var(--surface);
+      color: var(--text);
+      font-size: 16px;
+      font-family: var(--font);
+    }
+
+    select {
+      min-height: 58px;
+      padding: 14px 18px;
+      cursor: pointer;
+      line-height: 1.6;
+    }
+
+    option {
+      font-family: var(--font);
+      background: var(--surface);
+      color: var(--text);
+    }
+
+    input { min-height: 56px; padding: 13px 17px; }
+
+    textarea {
+      min-height: 230px;
+      padding: 18px;
+      resize: vertical;
+      line-height: 1.85;
+    }
+
+    textarea::placeholder, input::placeholder {
+      color: var(--muted);
+      opacity: .8;
+    }
+
+    select:disabled, textarea:disabled {
+      cursor: not-allowed;
+      background: var(--soft);
+      opacity: .65;
+    }
+
+    select:focus, textarea:focus, input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 4px var(--ring);
+    }
+
+    .field-meta {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 12px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .actions {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr) auto;
+      gap: 10px;
+      align-items: stretch;
+    }
+
+    .button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      min-height: 52px;
+      padding: 12px 18px;
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      background: var(--surface);
+      color: var(--text);
+      font-size: 13px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .button.primary {
+      width: 100%;
+      border-color: transparent;
+      background: var(--accent);
+      color: #fff;
+      box-shadow: 0 8px 22px var(--ring);
+    }
+
+    .button.quiet {
+      background: transparent;
+      color: var(--muted);
+    }
+
+    .button.small {
+      min-height: 42px;
+      padding: 9px 14px;
+      border-radius: 14px;
+      font-size: 12px;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      .button.primary { color: #17132e; }
+    }
+
+    @media (hover: hover) {
+      .button:not(:disabled):hover,
+      .icon-button:not(:disabled):hover {
+        transform: translateY(-2px);
+        border-color: var(--accent);
+      }
+
+      .button.primary:not(:disabled):hover {
+        background: var(--accent-hover);
+      }
+    }
+
+    .button:not(:disabled):active,
+    .icon-button:not(:disabled):active {
+      transform: translateY(0);
+    }
+
+    .spinner {
+      width: 17px;
+      height: 17px;
+      border: 2px solid currentColor;
+      border-right-color: transparent;
+      border-radius: 50%;
+      animation: spin .7s linear infinite;
+    }
+
+    .needs-manual {
+      border-color: var(--amber) !important;
+      box-shadow: 0 0 0 4px var(--amber-ring);
+    }
+
+    .detected { animation: detect-pulse .9s ease; }
+
+    .result {
+      min-width: 0;
+      margin-top: 32px;
+      padding-top: 28px;
+      border-top: 1px solid var(--border);
+      animation: slide-in .35s ease both;
+    }
+
+    .result-heading {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    h2 {
+      margin: 0;
+      font-size: 19px;
+      font-weight: 800;
+      letter-spacing: -.03em;
+    }
+
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 18px;
+    }
+
+    .chip, .badge {
+      display: inline-flex;
+      align-items: center;
+      max-width: 100%;
+      padding: 7px 12px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 600;
+      overflow-wrap: anywhere;
+    }
+
+    .chip {
+      border: 1px solid var(--border);
+      background: var(--soft);
+    }
+
+    .badge.good { color: var(--green); background: var(--green-bg); }
+    .badge.review { color: var(--amber); background: var(--amber-bg); }
+
+    .table-wrap {
+      width: 100%;
+      overflow-x: auto;
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      background: var(--surface);
+      overscroll-behavior-x: contain;
+    }
+
+    table {
+      width: 100%;
+      min-width: 900px;
+      border-collapse: collapse;
+      font-size: 13px;
+      text-align: left;
+    }
+
+    th {
+      background: var(--soft);
+      color: var(--muted);
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    th, td {
+      padding: 15px 16px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+      line-height: 1.8;
+    }
+
+    td {
+      max-width: 280px;
+      overflow-wrap: anywhere;
+      white-space: pre-wrap;
+    }
+
+    td:nth-child(4) {
+      min-width: 140px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    td:last-child { min-width: 200px; }
+    tbody tr:last-child td { border-bottom: 0; }
+    tbody tr:hover { background: var(--soft); }
+
+    .empty-cell {
+      text-align: center;
+      color: var(--muted);
+      padding: 26px;
+    }
+
+    details {
+      margin-top: 16px;
+      padding: 15px 18px;
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      background: var(--soft);
+    }
+
+    summary {
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .issue-list {
+      margin: 14px 0 0;
+      padding-left: 22px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .issue-list li {
+      padding: 4px 0;
+      overflow-wrap: anywhere;
+      white-space: pre-wrap;
+    }
+
+    .no-issues {
+      margin: 12px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .result-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 9px;
+      margin-top: 18px;
+    }
+
+    footer {
+      margin-top: 30px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    footer a {
+      color: var(--accent);
+      font-weight: 700;
+      text-decoration: none;
+    }
+
+    footer a:hover { text-decoration: underline; }
+
+    dialog {
+      width: min(440px, calc(100% - 32px));
+      max-height: calc(100svh - 48px);
+      overflow-y: auto;
+      padding: 28px;
+      border: 1px solid var(--border);
+      border-radius: 26px;
+      background: var(--surface);
+      color: var(--text);
+      box-shadow: var(--shadow);
+    }
+
+    dialog::backdrop {
+      background: rgba(14, 17, 35, .48);
+      backdrop-filter: blur(5px);
+      -webkit-backdrop-filter: blur(5px);
+    }
+
+    dialog h2 { margin-bottom: 22px; }
+
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 22px;
+    }
+
+    .modal-actions .primary { width: auto; min-width: 100px; }
+
+    .toast {
+      position: fixed;
+      z-index: 1000;
+      bottom: max(24px, env(safe-area-inset-bottom));
+      left: 50%;
+      width: max-content;
+      max-width: min(560px, calc(100vw - 32px));
+      padding: 14px 20px;
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      background: var(--surface);
+      color: var(--text);
+      box-shadow: var(--shadow);
+      font-family: var(--font);
+      font-size: 13px;
+      line-height: 1.7;
+      overflow-wrap: anywhere;
+      pointer-events: none;
+      opacity: 0;
+      transform: translate(-50%, 12px);
+      transition: opacity .2s ease, transform .2s ease;
+    }
+
+    .toast.visible { opacity: 1; transform: translate(-50%, 0); }
+    .toast.error { background: var(--red-bg); color: var(--red); }
+    .toast.warning { background: var(--amber-bg); color: var(--amber); }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    @keyframes slide-in {
+      from { opacity: 0; transform: translateY(16px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes detect-pulse {
+      0%, 100% { box-shadow: 0 0 0 0 transparent; }
+      40% { border-color: var(--accent); box-shadow: 0 0 0 6px var(--ring); }
+    }
+
+    @media (max-width: 420px) {
+      .card { padding: 24px 18px; }
+      .header { padding-right: 54px; }
+      .icon-button { width: 42px; height: 42px; }
+      .actions { gap: 7px; }
+      .actions .button { padding: 12px; }
+      textarea { min-height: 210px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: .01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: .01ms !important;
+        scroll-behavior: auto !important;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <main class="card">
+    <header class="header">
+      <p class="eyebrow">Simple. Clear. Organized.</p>
+      <h1>Aryan Upadhayay Data Parser</h1>
+      <p class="subtitle">Paste your text, confirm the district and mandal, and submit.</p>
+
+      <button
+        class="icon-button"
+        id="urlButton"
+        type="button"
+        aria-label="Add URL"
+        title="URL"
+        aria-haspopup="dialog"
+        aria-controls="urlDialog"
+      >
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="m16 3 5 5-12 12-6 1 1-6L16 3Z"></path>
+          <path d="m14 5 5 5"></path>
+        </svg>
+        <span id="urlDot" class="saved-dot" aria-hidden="true" hidden></span>
+      </button>
+    </header>
+
+    <form id="parserForm">
+      <div class="field">
+        <label for="district" lang="hi">जिला</label>
+        <select id="district" name="district" lang="hi" required>
+          <option value="">जिला चुनें</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="mandal" lang="hi">मंडल</label>
+        <select id="mandal" name="mandal" lang="hi" required disabled>
+          <option value="">मंडल चुनें</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="sourceText">Text to parse</label>
+        <textarea
+          id="sourceText"
+          name="text"
+          placeholder="अपना टेक्स्ट यहाँ पेस्ट करें…"
+          aria-describedby="characterCount"
+          spellcheck="false"
+          required
+        ></textarea>
+        <div class="field-meta">
+          <span id="characterCount">0 characters</span>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button class="button" id="pasteButton" type="button">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <rect x="8" y="3" width="8" height="4" rx="1.5"></rect>
+            <path d="M8 5H6a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"></path>
+          </svg>
+          Paste
+        </button>
+
+        <button class="button primary" id="submitButton" type="submit" disabled>
+          <span class="spinner" id="submitSpinner" aria-hidden="true" hidden></span>
+          <span id="submitLabel">Submit</span>
+        </button>
+
+        <button class="button quiet" id="clearButton" type="button">Clear</button>
+      </div>
+    </form>
+
+    <section id="resultSection" class="result" aria-labelledby="resultTitle" hidden>
+      <div class="result-heading">
+        <h2 id="resultTitle">Parsed result</h2>
+        <span id="reviewBadge" class="badge"></span>
+      </div>
+
+      <div id="summaryChips" class="chips"></div>
+
+      <div
+        class="table-wrap"
+        role="region"
+        aria-label="Parsed entries"
+        tabindex="0"
+      >
+        <table lang="hi">
+          <caption class="sr-only">पार्स की गई प्रविष्टियाँ</caption>
+          <thead>
+            <tr>
+              <th scope="col">क्र०</th>
+              <th scope="col">पद</th>
+              <th scope="col">नाम</th>
+              <th scope="col">मोबाइल</th>
+              <th scope="col">जाति</th>
+              <th scope="col">उम्र</th>
+              <th scope="col">योग्यता</th>
+              <th scope="col">पता</th>
+            </tr>
+          </thead>
+          <tbody id="entriesBody"></tbody>
+        </table>
+      </div>
+
+      <details id="issuesPanel">
+        <summary id="issuesSummary">Issues (0)</summary>
+        <ul id="issuesList" class="issue-list"></ul>
+        <p id="noIssues" class="no-issues" hidden>No issues reported.</p>
+      </details>
+
+      <div class="result-actions">
+        <button class="button small" id="copyButton" type="button">Copy JSON</button>
+        <button class="button small" id="downloadButton" type="button">Download JSON</button>
+      </div>
+    </section>
+
+    <footer>
+      Made by
+      <a href="https://github.com/upgradojha" target="_blank" rel="noopener noreferrer">
+        @upgradojha
+      </a>
+    </footer>
+  </main>
+
+  <dialog id="urlDialog" aria-labelledby="urlTitle">
+    <form id="urlForm">
+      <h2 id="urlTitle">Add URL</h2>
+      <label for="urlInput">URL</label>
+      <input
+        id="urlInput"
+        name="url"
+        type="url"
+        placeholder="https://..."
+        autocomplete="off"
+        autocapitalize="none"
+        spellcheck="false"
+        required
+      >
+      <div class="modal-actions">
+        <button class="button quiet" id="cancelUrlButton" type="button">Cancel</button>
+        <button class="button primary" type="submit">Save</button>
+      </div>
+    </form>
+  </dialog>
+
+  <div id="toast" class="toast" role="status" aria-live="polite" aria-atomic="true"></div>
+
+  <script>
+    "use strict";
+
+    // ── Data ────────────────────────────────────────────────────────
+
+    const DISTRICT_MANDAL_MAP = {
+      "उत्तर पश्चिमी": [
+        "स्वरूप नगर",
+        "समयपुर बदली",
+        "पूतकला",
+        "सहाबाद डेरी",
+        "होलम्बी",
+        "पूठखुर्द",
+        "जहांगीर पूरी",
+        "स्वरुप नगर",
+        "54-D रोहिणी",
+        "विजय विहार",
+        "नरेला",
+        "बांकनेर",
+        "होलंबी कलां",
+        "अलीपुर",
+        "बरवासनपुर",
+        "भलस्वा",
+        "जहाँगीर पुरी",
+        "समयपुर बादली",
+        "रोहिणी-A",
+        "रोहिणी- B",
+        "रिठाला",
+        "विजय बिहार",
+        "बुद्ध बिहार",
+        "फुट कलां",
+        "बेगमपुर",
+        "शाहबाद डेयरी",
+        "फुट खुर्द",
+        "बवाना",
+        "नांगल ठाकरान",
+        "रोहिणी - F",
+        "रोहिणी - E",
+        "रोहिणी- D"
+      ],
+      "उत्तर पूर्वी": [
+        "श्रीराम कालोनी",
+        "सादतपूर",
+        "धांडा",
+        "कादिपूर",
+        "तिमारपूर",
+        "सोनिया विहार",
+        "झरोदा",
+        "संतनगर",
+        "बुराड़ी",
+        "गौतमपूरी",
+        "सभापूर",
+        "मौजपूर",
+        "झरौदा",
+        "फरावल नगदश्लिम",
+        "भजन पूरा",
+        "कांदीपुर",
+        "बुराड़ी",
+        "मुकुंदपुर",
+        "संत नगर",
+        "झड़ोदा",
+        "तिमारपुर",
+        "मलकागंज",
+        "मुख़र्जी नगर",
+        "सीलमपुर",
+        "गौतमपुरी",
+        "चौहान बांगर",
+        "मौजपुर",
+        "ब्रह्मपुरी",
+        "भजनपुरा",
+        "घोंडा",
+        "यमुना विहार",
+        "श्रीराम कॉलोनी",
+        "सादतपुर",
+        "करावल नगर"
+      ],
+      "करोल बाग": [
+        "रमेश नगर",
+        "करोल बाग",
+        "पहाड़गंज",
+        "कर्मपुरा",
+        "वेस्ट पटेल नगर",
+        "नारायणा",
+        "मोती नगर",
+        "इंद्रपुरी",
+        "देव नगर",
+        "दिल्ली केंट",
+        "दिल्ली कैंट",
+        "ईस्ट पटेल नगर",
+        "रंजीत नगर",
+        "बलजीत नगर",
+        "इन्द्रपुरी",
+        "राजेन्द्र नगर",
+        "सदर कैंट",
+        "चाणक्यपुरी"
+      ],
+      "केशवपुरम": [
+        "धीरपुर",
+        "आजादपुर",
+        "शालीमार बाग ए",
+        "रानी बाग",
+        "वजीरपुर",
+        "शालीमार बाग बी",
+        "अशोक विहार",
+        "आदर्श नगर",
+        "केशवपुरम",
+        "पश्चिम विहार",
+        "पीतमपुरा",
+        "सरस्वती विहार",
+        "कोहाट एन्क्लेव",
+        "शकूरपुर",
+        "त्रिनगर"
+      ],
+      "चाँदनी चौक": [
+        "कमला नगर",
+        "चांदनी चौक",
+        "सिविल लाईन",
+        "संगमपार्क",
+        "रामनगर",
+        "कमलानगर",
+        "शास्त्रीनगर",
+        "सदर बाजार",
+        "दिल्ली गेट",
+        "मॉडल टाउन",
+        "संगम पार्क",
+        "शास्त्री नगर",
+        "किशनगंज",
+        "सिविल लाइन",
+        "बाजार सीता राम",
+        "राम नगर",
+        "कुरैश नगर"
+      ],
+      "दक्षिणी दिल्ली": [
+        "168 संगम विहार सी",
+        "कालकाजी",
+        "संगम विहार-B",
+        "संगम विहार-C",
+        "संगम विहार-A",
+        "पुल प्रह्लादपुर",
+        "तुगलकाबाद",
+        "बदरपुर",
+        "मोलडबंद",
+        "गोविंदपुरी",
+        "जैतपुर",
+        "देवली",
+        "तिगड़ी",
+        "संगम विहार - ए",
+        "दक्षिणपुरी",
+        "संगम विहार - सी",
+        "संगम विहार - बी",
+        "तुग़लकाबाद विस्तार",
+        "श्रीनिवासपुरी",
+        "हरकेश नगर",
+        "पुल प्रहलादपुर",
+        "मोलड़बंद",
+        "मीठापुर",
+        "हरिनगर"
+      ],
+      "नई दिल्ली": [
+        "मालवीय नगर",
+        "मुनिरका",
+        "चिराग दिल्ली",
+        "नई दिल्ली",
+        "तीन मूर्ति",
+        "अमर कालोनी",
+        "आर.के. पुरम",
+        "सी.आर. पार्क",
+        "सरोजनी नगर",
+        "अमर कॉलोनी",
+        "एंड्र्यूज़ गंज",
+        "कोटला मुबारकपुर",
+        "ग्रीन पार्क",
+        "हौज खास",
+        "आर के पुरम",
+        "वसंत विहार",
+        "चितरंजन पार्क",
+        "ग्रेटर कैलाश"
+      ],
+      "नजफगढ़": [
+        "मंगलपुरी",
+        "नंगली सकरावती",
+        "ककरोला",
+        "बापरौला",
+        "बिन्दापुर",
+        "मोहन गार्डन",
+        "नजफगढ़",
+        "हस्तसाल",
+        "रौशनपुर",
+        "कंवर सिंह नगर",
+        "विकासपुरी",
+        "नवादा",
+        "द्वारका ए",
+        "सैनिक एन्क्लेव",
+        "हस्तासाल",
+        "सागरपुर",
+        "107 विकास पुरी",
+        "108 हस्तसाल",
+        "109 विकास नगर",
+        "110 कुंवर सिंह नगर",
+        "111 बापरौला",
+        "112 सैनिक एन्क्लेव",
+        "113 मोहन गार्डन",
+        "114 नवादा",
+        "115 उत्तम नगर",
+        "116 बिन्दापुर",
+        "119 मंगलापुरी",
+        "120 द्वारका बी",
+        "121 द्वारका ए",
+        "122 मटियाला",
+        "123 ककरोला",
+        "124 नंगली सकरावती",
+        "125 छावला",
+        "126 ईशापुर",
+        "127 नजफगढ़",
+        "128 दिचाऊँ कलां",
+        "129 रौशनपुरा"
+      ],
+      "नवीन शाहदरा": [
+        "दिलशाद गार्डन",
+        "सुन्दर नगरी",
+        "नन्द नगरी",
+        "अशोक नगर",
+        "राम नगर",
+        "रोहतास नगर",
+        "वेलकम",
+        "सुभाष मोहल्ला",
+        "कबीर नगर",
+        "गोरख पार्क",
+        "कर्दमपुरी",
+        "हर्ष विहार",
+        "सबोली",
+        "गोकलपुर",
+        "जौहरीपुर",
+        "पूर्वी करावल नगर",
+        "दयालपुर",
+        "मुस्तफाबाद",
+        "नेहरू विहार",
+        "बृजपुरी"
+      ],
+      "पश्चिमी दिल्ली": [
+        "विष्णु गार्डन",
+        "पंजाबी बाग",
+        "मादीपुर",
+        "रघुबीर नगर",
+        "राजौरी गार्डन",
+        "चौखंडी नगर",
+        "सुभाष नगर",
+        "हरि नगर",
+        "फ़तेह नगर",
+        "तिलक नगर",
+        "ख्याला",
+        "केशोपुर",
+        "जनकपुरी साउथ",
+        "महावीर एन्क्लेव",
+        "जनकपुरी वेस्ट"
+      ],
+      "मयूर विहार": [
+        "मयूर विहार फेस-1",
+        "विनोड नगर",
+        "मदनपुर खादर",
+        "कल्याण पूरी",
+        "लाजपत नगर",
+        "मदनपुर खादर ईस्ट",
+        "मयूर विहार फेज 2",
+        "न्यू अशोक नगर",
+        "मयूर विहार फेज 1",
+        "घड़ौली",
+        "त्रिलोकपुरी",
+        "सिद्धार्थ नगर",
+        "घड़ोली",
+        "मयूर विहार फेज",
+        "कोंडली",
+        "मदनपुर खादर वेस्ट",
+        "दरियागंज",
+        "मंडावली",
+        "विनोद नगर",
+        "सरिता विहार",
+        "पटपड़गज",
+        "कल्याणपुरी",
+        "अबुल फजल",
+        "जाकिर नगर"
+      ],
+      "महरौली": [
+        "महावीर एन्क्लैव",
+        "मधु विहार",
+        "महरौली",
+        "महिपालपुर",
+        "पालम",
+        "राज नगर",
+        "आया नगर",
+        "बिजवासन",
+        "भाटी",
+        "द्वारका-C",
+        "कापसहेड़ा",
+        "खानपुर",
+        "छत्तरपुर",
+        "लाडो सराय",
+        "द्वारका C 130",
+        "बिजवासन 131",
+        "कापसहेड़ा 132",
+        "महिपालपुर 133",
+        "राज नगर 134",
+        "पालम 135",
+        "मधु विहार 136",
+        "महावीर एन्क्लेव 137",
+        "साध नगर 138",
+        "लाडो सराय 154",
+        "महरौली 155",
+        "वसंत कुंज 156",
+        "आयानगर 157",
+        "भाटी 158",
+        "छत्तरपुर 159",
+        "सैदुलाजाब 160",
+        "मदनगीर 165",
+        "पुष्प विहार 166",
+        "खानपुर 167"
+      ],
+      "शाहदरा": [
+        "पांडव नगर",
+        "दिलशाद कॉलोनी",
+        "आनंद विहार",
+        "झिलमिल",
+        "शकरपुर",
+        "विश्वास नगर",
+        "प्रीत बिहार",
+        "गाँधी नगर",
+        "आजाद नगर",
+        "शास्त्री पार्क",
+        "कृष्णा नगर",
+        "ललिता पार्क",
+        "लक्ष्मी नगर",
+        "प्रीत विहार",
+        "आई.पी.एक्सटेंशन",
+        "आनन्द विहार",
+        "अनारकली",
+        "जगतपुरी",
+        "गीता कॉलोनी",
+        "गांधी नगर",
+        "आज़ाद नगर",
+        "शाहदरा"
+      ]
+    };
+
+    const ENTRY_KEYS = [
+      "क्र० सं०", "पद", "नाम", "मोबाइल", "जाति", "उम्र", "योग्यता", "पता"
+    ];
+
+    const STORAGE_KEY = "aryan-upadhayay-data-parser:url";
+
+    // ── State ───────────────────────────────────────────────────────
+
+    const $ = id => document.getElementById(id);
+
+    const ui = {
+      form: $("parserForm"),
+      district: $("district"),
+      mandal: $("mandal"),
+      text: $("sourceText"),
+      count: $("characterCount"),
+      paste: $("pasteButton"),
+      submit: $("submitButton"),
+      spinner: $("submitSpinner"),
+      submitLabel: $("submitLabel"),
+      clear: $("clearButton"),
+      urlButton: $("urlButton"),
+      urlDot: $("urlDot"),
+      dialog: $("urlDialog"),
+      urlForm: $("urlForm"),
+      urlInput: $("urlInput"),
+      cancelUrl: $("cancelUrlButton"),
+      result: $("resultSection"),
+      badge: $("reviewBadge"),
+      chips: $("summaryChips"),
+      entries: $("entriesBody"),
+      issues: $("issuesPanel"),
+      issuesSummary: $("issuesSummary"),
+      issuesList: $("issuesList"),
+      noIssues: $("noIssues"),
+      copy: $("copyButton"),
+      download: $("downloadButton"),
+      toast: $("toast")
+    };
+
+    const state = {
+      url: "",
+      busy: false,
+      pasting: false,
+      result: null,
+      toastTimer: null,
+      previousFocus: null
+    };
+
+    // ── Detect ──────────────────────────────────────────────────────
+
+    const normalize = value => String(value)
+      .normalize("NFC")
+      .replace(/[\u200B-\u200D\u2060\uFEFF]/g, "")
+      .replace(/\s+/gu, " ")
+      .trim();
+
+    // Normalize only for matching; keep original map strings for selection.
+    const cleanMandal = value => normalize(value)
+      .replace(/^[\p{N}]+[\s.():\-।]*/u, "")
+      .trim();
+
+    const escapeRegex = value =>
+      value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+    const isWord = value =>
+      /[\p{L}\p{M}\p{N}_]/u.test(value || "");
+
+    function nameHits(text, names) {
+      const hits = [];
+      const sorted = [...new Set(names)]
+        .sort((a, b) => b.length - a.length);
+
+      for (const name of sorted) {
+        if (!name) continue;
+
+        const regex = new RegExp(escapeRegex(name), "gu");
+
+        for (const match of text.matchAll(regex)) {
+          const start = match.index;
+          const end = start + name.length;
+
+          if (!isWord(text[start - 1]) && !isWord(text[end])) {
+            hits.push({ name, start, end });
+          }
+        }
+      }
+
+      // Avoid treating शाहदरा inside नवीन शाहदरा as another match.
+      return hits.filter(hit => !hits.some(other =>
+        other.start <= hit.start &&
+        other.end >= hit.end &&
+        other.name.length > hit.name.length
+      ));
+    }
+
+    function readLabels(text) {
+      const source = String(text)
+        .normalize("NFC")
+        .replace(/[\u200B-\u200D\u2060\uFEFF]/g, "");
+
+      // Supports plain labels, quoted keys, and labels on the same line.
+      const regex = /(?:^|[^\p{L}\p{M}\p{N}_])["“']?(जिला|मंडल)["”']?\s*[:：=\-]\s*["“']?/gu;
+      const markers = [...source.matchAll(regex)];
+
+      const fields = markers.map((match, index) => {
+        const start = match.index + match[0].length;
+        const limit = markers[index + 1]?.index ?? source.length;
+        const part = source.slice(start, limit);
+        const stop = part.search(/[\r\n,;|}"”'\]]/u);
+        const end = start + (stop < 0 ? part.length : stop);
+
+        return {
+          label: match[1],
+          value: source.slice(start, end),
+          start,
+          end
+        };
+      });
+
+      const without = label => {
+        let result = source;
+
+        for (const field of [...fields].reverse()) {
+          if (field.label === label) {
+            result =
+              result.slice(0, field.start) +
+              " " +
+              result.slice(field.end);
+          }
+        }
+
+        return normalize(result);
+      };
+
+      return { fields, without };
+    }
+
+    function detectSelection(text, map) {
+      const records = Object.entries(map).flatMap(([district, values]) =>
+        [...new Set(values)].map(mandal => ({
+          district,
+          mandal,
+          name: cleanMandal(mandal)
+        }))
+      );
+
+      const districts = Object.keys(map);
+      const { fields, without } = readLabels(text);
+      const districtFields = fields.filter(field => field.label === "जिला");
+      const mandalFields = fields.filter(field => field.label === "मंडल");
+
+      const prefixMatch = (value, names) => nameHits(value, names)
+        .filter(hit => hit.start === 0)
+        .sort((a, b) => b.name.length - a.name.length)[0]?.name;
+
+      let explicitDistrict = "";
+
+      if (districtFields.length) {
+        const matches = districtFields.map(field =>
+          prefixMatch(normalize(field.value), districts.map(normalize))
+        );
+
+        // Conflicting or unknown explicit labels need manual selection.
+        if (matches.some(value => !value) || new Set(matches).size !== 1) {
+          return null;
+        }
+
+        explicitDistrict = districts.find(value =>
+          normalize(value) === matches[0]
+        );
+      }
+
+      let names;
+
+      if (mandalFields.length) {
+        names = mandalFields.map(field =>
+          prefixMatch(cleanMandal(field.value), records.map(record => record.name))
+        );
+
+        if (names.some(value => !value) || new Set(names).size !== 1) {
+          return null;
+        }
+      } else {
+        // Exclude district labels so a district is not mistaken for its mandal.
+        const hits = nameHits(
+          without("जिला"),
+          records.map(record => record.name)
+        );
+
+        if (!hits.length) return null;
+
+        const longest = Math.max(...hits.map(hit => hit.name.length));
+        names = hits
+          .filter(hit => hit.name.length === longest)
+          .map(hit => hit.name);
+      }
+
+      const districtMentions = new Set(
+        nameHits(without("मंडल"), districts.map(normalize))
+          .map(hit => hit.name)
+      );
+
+      const resolutions = [];
+
+      for (const name of new Set(names)) {
+        let candidates = records.filter(record => record.name === name);
+
+        if (explicitDistrict) {
+          candidates = candidates.filter(record =>
+            record.district === explicitDistrict
+          );
+        }
+
+        let owners = [...new Set(
+          candidates.map(record => record.district)
+        )];
+
+        if (owners.length > 1) {
+          owners = owners.filter(district =>
+            districtMentions.has(normalize(district))
+          );
+        }
+
+        if (owners.length !== 1) return null;
+
+        candidates = candidates.filter(record =>
+          record.district === owners[0]
+        );
+
+        // Prefer an explicitly supplied original value, including its number.
+        const exact = candidates.find(record =>
+          mandalFields.some(field =>
+            normalize(field.value) === normalize(record.mandal)
+          )
+        );
+
+        const originalHits = nameHits(
+          normalize(text),
+          candidates.map(record => normalize(record.mandal))
+        );
+
+        const original = candidates.find(record =>
+          originalHits.some(hit =>
+            hit.name === normalize(record.mandal)
+          )
+        );
+
+        resolutions.push(exact || original || candidates[0]);
+      }
+
+      if (resolutions.length !== 1) return null;
+
+      return {
+        district: resolutions[0].district,
+        mandal: resolutions[0].mandal
+      };
+    }
+
+    function autoDetect() {
+      const match = detectSelection(ui.text.value, DISTRICT_MANDAL_MAP);
+
+      clearDetectionStyles();
+
+      if (!match) {
+        ui.district.value = "";
+        populateMandals();
+        ui.district.classList.add("needs-manual");
+        ui.mandal.classList.add("needs-manual");
+        updateUI();
+        toast("Could not detect, please select manually", "warning");
+        return;
+      }
+
+      ui.district.value = match.district;
+      populateMandals();
+      ui.mandal.value = match.mandal;
+
+      // Restart the highlight animation after consecutive pastes.
+      void ui.district.offsetWidth;
+      ui.district.classList.add("detected");
+      ui.mandal.classList.add("detected");
+
+      updateUI();
+      toast(`Detected: ${match.district} → ${match.mandal}`);
+    }
+
+    // ── UI helpers ──────────────────────────────────────────────────
+
+    // Dynamic content uses textContent/value, never HTML interpolation.
+    function textElement(tag, text, className = "") {
+      const element = document.createElement(tag);
+      element.textContent = text;
+      if (className) element.className = className;
+      return element;
+    }
+
+    function appendOption(select, value, label) {
+      const option = document.createElement("option");
+      option.value = value;
+      option.textContent = label;
+      select.append(option);
+    }
+
+    function populateMandals() {
+      ui.mandal.replaceChildren();
+      appendOption(ui.mandal, "", "मंडल चुनें");
+
+      const values = DISTRICT_MANDAL_MAP[ui.district.value] || [];
+      const sorted = [...new Set(values)].sort((a, b) =>
+        a.localeCompare(b, "hi", { numeric: true })
+      );
+
+      for (const value of sorted) {
+        appendOption(ui.mandal, value, value);
+      }
+
+      ui.mandal.value = "";
+      ui.mandal.disabled = state.busy || !ui.district.value;
+    }
+
+    function updateUI() {
+      const count = Array.from(ui.text.value).length;
+      ui.count.textContent =
+        `${count.toLocaleString("en-IN")} ${count === 1 ? "character" : "characters"}`;
+
+      const ready = Boolean(
+        ui.district.value &&
+        ui.mandal.value &&
+        ui.text.value.trim()
+      );
+
+      ui.submit.disabled = state.busy || state.pasting || !ready;
+      ui.paste.disabled = state.busy || state.pasting;
+      ui.clear.disabled = state.busy || state.pasting;
+      ui.district.disabled = state.busy;
+      ui.mandal.disabled = state.busy || !ui.district.value;
+      ui.text.disabled = state.busy;
+      ui.urlButton.disabled = state.busy;
+      ui.spinner.hidden = !state.busy;
+      ui.submitLabel.textContent = state.busy ? "Submitting…" : "Submit";
+      ui.form.setAttribute("aria-busy", String(state.busy));
+
+      ui.urlDot.hidden = !state.url;
+      ui.urlButton.setAttribute(
+        "aria-label",
+        state.url ? "Edit URL, URL saved" : "Add URL"
+      );
+    }
+
+    function clearDetectionStyles() {
+      for (const select of [ui.district, ui.mandal]) {
+        select.classList.remove("needs-manual", "detected");
+      }
+    }
+
+    function invalidateResult() {
+      state.result = null;
+      ui.result.hidden = true;
+      ui.entries.replaceChildren();
+      ui.chips.replaceChildren();
+      ui.issuesList.replaceChildren();
+      ui.issues.open = false;
+    }
+
+    function toast(message, kind = "") {
+      clearTimeout(state.toastTimer);
+
+      // Keep notifications visible when the native dialog is open.
+      const parent = ui.dialog.open ? ui.dialog : document.body;
+      if (ui.toast.parentElement !== parent) parent.append(ui.toast);
+
+      ui.toast.className = "toast";
+      if (kind) ui.toast.classList.add(kind);
+      ui.toast.textContent = message;
+
+      void ui.toast.offsetWidth;
+      ui.toast.classList.add("visible");
+
+      state.toastTimer = setTimeout(() => {
+        ui.toast.classList.remove("visible");
+      }, 5000);
+    }
+
+    function validUrl(value) {
+      try {
+        const url = new URL(value);
+        return (
+          (url.protocol === "https:" || url.protocol === "http:") &&
+          Boolean(url.hostname)
+        );
+      } catch {
+        return false;
+      }
+    }
+
+    function openUrlDialog() {
+      if (ui.dialog.open) return;
+
+      state.previousFocus = document.activeElement;
+      ui.urlInput.value = state.url;
+      ui.urlInput.setCustomValidity("");
+      ui.dialog.showModal();
+
+      if (ui.toast.classList.contains("visible")) {
+        ui.dialog.append(ui.toast);
+      }
+
+      ui.urlInput.focus();
+    }
+
+    function displayValue(value) {
+      if (value === null || value === undefined || value === "") return "—";
+      return typeof value === "object"
+        ? JSON.stringify(value, null, 2)
+        : String(value);
+    }
+
+    function validateResult(value) {
+      if (Array.isArray(value)) {
+        if (value.length !== 1) {
+          throw new Error("The response has an unexpected format.");
+        }
+        value = value[0];
+      }
+
+      const isObject = item =>
+        item !== null && typeof item === "object" && !Array.isArray(item);
+
+      if (
+        !isObject(value) ||
+        typeof value["जिला"] !== "string" ||
+        typeof value["मंडल"] !== "string" ||
+        !Array.isArray(value.entries) ||
+        !value.entries.every(isObject) ||
+        typeof value.needs_review !== "boolean" ||
+        !Array.isArray(value.issues)
+      ) {
+        throw new Error("The response has an unexpected format.");
+      }
+
+      return value;
+    }
+
+    function renderResult(result) {
+      ui.chips.replaceChildren(
+        textElement("span", `जिला: ${result["जिला"]}`, "chip"),
+        textElement("span", `मंडल: ${result["मंडल"]}`, "chip"),
+        textElement("span", `Entries: ${result.entries.length}`, "chip")
+      );
+
+      ui.badge.textContent = result.needs_review ? "Needs review" : "Looks good";
+      ui.badge.className = `badge ${result.needs_review ? "review" : "good"}`;
+
+      const rows = document.createDocumentFragment();
+
+      for (const entry of result.entries) {
+        const row = document.createElement("tr");
+
+        for (const key of ENTRY_KEYS) {
+          const cell = textElement("td", displayValue(entry[key]));
+          if (key === "मोबाइल") cell.dir = "ltr";
+          row.append(cell);
+        }
+
+        rows.append(row);
+      }
+
+      if (!result.entries.length) {
+        const row = document.createElement("tr");
+        const cell = textElement("td", "No entries found.", "empty-cell");
+        cell.colSpan = ENTRY_KEYS.length;
+        row.append(cell);
+        rows.append(row);
+      }
+
+      ui.entries.replaceChildren(rows);
+      ui.issues.open = false;
+      ui.issuesSummary.textContent = `Issues (${result.issues.length})`;
+
+      const issues = document.createDocumentFragment();
+      for (const issue of result.issues) {
+        issues.append(textElement("li", displayValue(issue)));
+      }
+
+      ui.issuesList.replaceChildren(issues);
+      ui.issuesList.hidden = result.issues.length === 0;
+      ui.noIssues.hidden = result.issues.length !== 0;
+      ui.result.hidden = false;
+    }
+
+    // ── Submit ──────────────────────────────────────────────────────
+
+    ui.form.addEventListener("submit", async event => {
+      event.preventDefault();
+
+      if (state.busy || state.pasting || !ui.form.reportValidity()) return;
+      if (!ui.text.value.trim()) return;
+
+      if (!state.url) {
+        openUrlDialog();
+        toast("Please add a URL first", "warning");
+        return;
+      }
+
+      const payload = {
+        district: ui.district.value,
+        mandal: ui.mandal.value,
+        text: ui.text.value
+      };
+
+      state.busy = true;
+      invalidateResult();
+      updateUI();
+
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 60000);
+
+      try {
+        let response;
+
+        try {
+          response = await fetch(state.url, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+            signal: controller.signal
+          });
+        } catch (error) {
+          if (error.name === "AbortError") throw error;
+          throw new Error(
+            "Could not reach the URL. Check your connection and try again."
+          );
+        }
+
+        if (response.status !== 200) {
+          throw new Error(`Request failed (${response.status}). Please try again.`);
+        }
+
+        let data;
+
+        try {
+          data = await response.json();
+        } catch (error) {
+          if (error.name === "AbortError") throw error;
+          throw new Error("The response could not be read. Please try again.");
+        }
+
+        const result = validateResult(data);
+        state.result = result;
+        renderResult(result);
+        toast("Result ready.");
+      } catch (error) {
+        toast(
+          error.name === "AbortError"
+            ? "The request took too long. Please try again."
+            : error.message || "Something went wrong. Please try again.",
+          "error"
+        );
+      } finally {
+        clearTimeout(timeout);
+        state.busy = false;
+        updateUI();
+      }
+    });
+
+    // ── UI events ───────────────────────────────────────────────────
+
+    ui.district.addEventListener("change", () => {
+      ui.district.classList.remove("needs-manual", "detected");
+      ui.mandal.classList.remove("detected");
+      populateMandals();
+      invalidateResult();
+      updateUI();
+    });
+
+    ui.mandal.addEventListener("change", () => {
+      ui.mandal.classList.remove("needs-manual", "detected");
+      invalidateResult();
+      updateUI();
+    });
+
+    ui.text.addEventListener("input", () => {
+      invalidateResult();
+      updateUI();
+    });
+
+    // The browser inserts manually pasted text before the next task.
+    ui.text.addEventListener("paste", () => {
+      setTimeout(() => {
+        if (state.busy) return;
+        invalidateResult();
+        updateUI();
+        autoDetect();
+      }, 0);
+    });
+
+    ui.paste.addEventListener("click", async () => {
+      if (state.busy || state.pasting) return;
+
+      state.pasting = true;
+      updateUI();
+
+      try {
+        const text = await navigator.clipboard.readText();
+        ui.text.value = text;
+        invalidateResult();
+        autoDetect();
+      } catch {
+        toast("Clipboard blocked, press Ctrl+V in the box", "warning");
+        ui.text.focus();
+      } finally {
+        state.pasting = false;
+        updateUI();
+      }
+    });
+
+    ui.clear.addEventListener("click", () => {
+      if (state.busy || state.pasting) return;
+
+      ui.text.value = "";
+      ui.district.value = "";
+      populateMandals();
+      clearDetectionStyles();
+      invalidateResult();
+
+      clearTimeout(state.toastTimer);
+      ui.toast.classList.remove("visible");
+      ui.toast.textContent = "";
+
+      updateUI();
+      ui.text.focus();
+    });
+
+    ui.urlButton.addEventListener("click", openUrlDialog);
+
+    ui.cancelUrl.addEventListener("click", () => ui.dialog.close());
+
+    ui.dialog.addEventListener("cancel", event => {
+      event.preventDefault();
+      ui.dialog.close();
+    });
+
+    ui.dialog.addEventListener("close", () => {
+      document.body.append(ui.toast);
+      if (state.previousFocus?.isConnected) state.previousFocus.focus();
+    });
+
+    ui.urlInput.addEventListener("input", () => {
+      ui.urlInput.setCustomValidity("");
+    });
+
+    ui.urlForm.addEventListener("submit", event => {
+      event.preventDefault();
+
+      const value = ui.urlInput.value.trim();
+
+      if (!validUrl(value)) {
+        ui.urlInput.setCustomValidity(
+          "Please enter a valid URL beginning with https:// or http://."
+        );
+        ui.urlInput.reportValidity();
+        return;
+      }
+
+      state.url = value;
+      let persisted = true;
+
+      try {
+        localStorage.setItem(STORAGE_KEY, value);
+      } catch {
+        persisted = false;
+      }
+
+      ui.dialog.close();
+      updateUI();
+
+      toast(
+        persisted ? "URL saved." : "URL saved for this session only.",
+        persisted ? "" : "warning"
+      );
+    });
+
+    ui.copy.addEventListener("click", async () => {
+      if (!state.result) return;
+
+      try {
+        await navigator.clipboard.writeText(
+          JSON.stringify(state.result, null, 2)
+        );
+        toast("JSON copied.");
+      } catch {
+        toast("Could not copy JSON. Please use Download JSON.", "warning");
+      }
+    });
+
+    ui.download.addEventListener("click", () => {
+      if (!state.result) return;
+
+      const blob = new Blob(
+        [JSON.stringify(state.result, null, 2)],
+        { type: "application/json;charset=utf-8" }
+      );
+
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "aryan-upadhayay-parsed-data.json";
+      link.hidden = true;
+
+      document.body.append(link);
+      link.click();
+      link.remove();
+
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    });
+
+    for (const select of [ui.district, ui.mandal]) {
+      select.addEventListener("animationend", () => {
+        select.classList.remove("detected");
+      });
+    }
+
+    // ── Initialize ──────────────────────────────────────────────────
+
+    for (const district of Object.keys(DISTRICT_MANDAL_MAP)) {
+      appendOption(ui.district, district, district);
+    }
+
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved && validUrl(saved)) state.url = saved;
+    } catch {
+      // The app remains usable when local storage is unavailable.
+    }
+
+    populateMandals();
+    updateUI();
+  </script>
+</body>
+</html>
